@@ -1,0 +1,76 @@
+name: qrcp
+base: core26
+version: '0.11.7'
+title: qrcp
+icon: snap/gui/qrcp.png
+summary: Transfer files over Wi-Fi between your computer and phone with a QR code
+description: |
+  qrcp starts a small web server on your local network and prints a QR
+  code in the terminal. Scan it with your phone to download the files you
+  are sending, or to upload files from the phone to your computer. Both
+  devices must be on the same network.
+
+  **Examples**
+
+     qrcp send ~/Pictures/photo.jpg
+     qrcp send --zip ~/Documents/report ~/Documents/notes.txt
+     qrcp receive --output ~/Downloads
+     qrcp --interface wlan0 --port 8080 send video.mp4
+     qrcp config
+
+  **File access**
+
+  qrcp can send and receive files in your home directory. To also use USB
+  drives and other removable media (/media, /mnt), run:
+
+     sudo snap connect qrcp:removable-media
+
+  The configuration file is stored in ~/snap/qrcp/current/.config/qrcp.
+license: MIT
+grade: stable
+confinement: strict
+website: https://qrcp.sh
+source-code:
+  - https://github.com/claudiodangelis/qrcp
+  - https://github.com/sidalit/qrcp-snap
+issues:
+  - https://github.com/claudiodangelis/qrcp/issues
+  - https://github.com/sidalit/qrcp-snap/issues
+contact: https://github.com/sidalit/qrcp-snap/issues
+
+platforms:
+  amd64:
+  arm64:
+  armhf:
+  ppc64el:
+  riscv64:
+  s390x:
+
+apps:
+  qrcp:
+    command: bin/qrcp
+    completer: share/bash-completion/completions/qrcp
+    plugs:
+      - desktop
+      - home
+      - removable-media
+      - network
+      - network-bind
+
+parts:
+  qrcp:
+    plugin: go
+    source: https://github.com/claudiodangelis/qrcp.git
+    source-tag: v$SNAPCRAFT_PROJECT_VERSION
+    build-snaps:
+      - go/1.27/stable
+    build-environment:
+      - CGO_ENABLED: '0'
+    override-build: |
+      go build -trimpath -o "$CRAFT_PART_INSTALL/bin/qrcp" -ldflags "-s -w \
+        -X github.com/claudiodangelis/qrcp/version.version=$SNAPCRAFT_PROJECT_VERSION \
+        -X github.com/claudiodangelis/qrcp/version.date=$(git log -1 --format=%cs)" .
+      mkdir -p "$CRAFT_PART_INSTALL/share/bash-completion/completions"
+      "$CRAFT_PART_INSTALL/bin/qrcp" completion bash \
+        > "$CRAFT_PART_INSTALL/share/bash-completion/completions/qrcp"
+      install -Dm644 LICENSE "$CRAFT_PART_INSTALL/share/doc/qrcp/LICENSE"
