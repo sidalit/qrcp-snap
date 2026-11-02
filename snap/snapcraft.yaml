@@ -41,10 +41,6 @@ contact: https://github.com/sidalit/qrcp-snap/issues
 platforms:
   amd64:
   arm64:
-  armhf:
-  ppc64el:
-  riscv64:
-  s390x:
 
 apps:
   qrcp:
